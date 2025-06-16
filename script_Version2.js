@@ -1,37 +1,82 @@
-const colors = ['red', 'green', 'blue'];
-let selectedColor = '';
+let balance = 100;
+let gameInterval;
+let gameInProgress = false;
 
-function randomColor() {
-  return colors[Math.floor(Math.random() * colors.length)];
+function updateBalanceDisplay() {
+  document.getElementById("balance").innerText = `Balance: ₹${balance}`;
 }
 
-function setColorBox() {
-  selectedColor = randomColor();
-  document.getElementById('colorBox').style.background = selectedColor;
+function logResult(picked, result, outcome, amount) {
+  const log = document.getElementById("history");
+  const entry = document.createElement("li");
+  entry.innerText = `You picked ${picked.toUpperCase()}, Result was ${result.toUpperCase()}. ${outcome}! ₹${amount}`;
+  log.prepend(entry);
 }
 
-function resetGame() {
-  setColorBox();
-  document.getElementById('result').textContent = '';
-  document.getElementById('playAgain').style.display = 'none';
-  document.querySelectorAll('.color-btn').forEach(btn => btn.disabled = false);
+function placeBet(color) {
+  if (gameInProgress) {
+    alert("Wait for the current game to finish.");
+    return;
+  }
+
+  const betAmount = parseInt(document.getElementById("bet").value);
+
+  if (isNaN(betAmount) || betAmount <= 0) {
+    alert("Enter a valid bet amount.");
+    return;
+  }
+
+  if (betAmount > balance) {
+    alert("Insufficient balance.");
+    return;
+  }
+
+  gameInProgress = true;
+  document.getElementById("result").innerText = "Waiting for result...";
+  let timeLeft = 3;
+  document.getElementById("timer").innerText = `Time left: ${timeLeft}s`;
+
+  gameInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById("timer").innerText = `Time left: ${timeLeft}s`;
+
+    if (timeLeft <= 0) {
+      clearInterval(gameInterval);
+      runGame(color, betAmount);
+    }
+  }, 1000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  setColorBox();
+function runGame(userColor, betAmount) {
+  const colors = ["red", "green", "violet"];
+  const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-  document.querySelectorAll('.color-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const guess = this.getAttribute('data-color');
-      if (guess === selectedColor) {
-        document.getElementById('result').textContent = 'Correct! 🎉';
-      } else {
-        document.getElementById('result').textContent = `Wrong! The colour was ${selectedColor}.`;
-      }
-      document.getElementById('playAgain').style.display = 'inline-block';
-      document.querySelectorAll('.color-btn').forEach(btn => btn.disabled = true);
-    });
-  });
+  document.getElementById("result").innerText = `Result: ${randomColor.toUpperCase()}`;
+  document.getElementById("timer").innerText = "";
 
-  document.getElementById('playAgain').addEventListener('click', resetGame);
-});
+  let outcomeText;
+  if (userColor === randomColor) {
+    let winnings = 0;
+    if (randomColor === "violet") {
+      winnings = betAmount * 5;
+    } else {
+      winnings = betAmount * 2;
+    }
+    balance += winnings - betAmount;
+    outcomeText = `You won ₹${winnings}`;
+    alert(outcomeText);
+    logResult(userColor, randomColor, "You WON", winnings);
+  } else {
+    balance -= betAmount;
+    outcomeText = `You lost ₹${betAmount}`;
+    alert(outcomeText);
+    logResult(userColor, randomColor, "You LOST", betAmount);
+  }
+
+  updateBalanceDisplay();
+  gameInProgress = false;
+}
+
+window.onload = function () {
+  updateBalanceDisplay();
+};
