@@ -1,2 +1,0 @@
-# Warrior
-Colour Prediction
