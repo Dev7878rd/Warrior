@@ -1,29 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Color Prediction Game</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Colour Prediction Game</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    .btn { padding: 15px 30px; margin: 10px; font-size: 20px; cursor: pointer; }
-    #result { margin-top: 20px; font-size: 24px; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      background-color: #f0f0f5;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 12px 25px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      width: 120px;
+    }
+
+    .red { background-color: red; }
+    .green { background-color: green; }
+
+    .balance-box, .bet-box {
+      font-size: 18px;
+      margin: 15px 0;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 150px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 22px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h1>Color Prediction Game</h1>
-  <p>Guess which color will be chosen!</p>
-  <button class="btn" onclick="makePrediction('Red')">Red</button>
-  <button class="btn" onclick="makePrediction('Green')">Green</button>
+
+  <h1>🎯 Colour Prediction Game</h1>
+
+  <div class="balance-box">
+    💰 Balance: ₹<span id="balance">100</span>
+  </div>
+
+  <div class="bet-box">
+    <label for="bet">Enter Bet Amount:</label><br>
+    <input type="number" id="bet" placeholder="e.g. 100" min="1">
+  </div>
+
+  <p>Choose a colour:</p>
+  <button class="btn red" onclick="makePrediction('red')">Red</button>
+  <button class="btn green" onclick="makePrediction('green')">Green</button>
+
   <div id="result"></div>
 
   <script>
+    let balance = 100; // Updated starting balance
+
     function makePrediction(userChoice) {
-      const colors = ["Red", "Green"];
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      let resultText = `You chose: <b>${userChoice}</b><br>Result: <b>${randomColor}</b><br>`;
-      resultText += (userChoice === randomColor) ? "<span style='color:green;'>You Won!</span>" : "<span style='color:red;'>Try Again!</span>";
-      document.getElementById('result').innerHTML = resultText;
+      const betInput = document.getElementById("bet");
+      const betAmount = parseInt(betInput.value);
+
+      if (isNaN(betAmount) || betAmount <= 0) {
+        alert("Please enter a valid bet amount.");
+        return;
+      }
+
+      if (betAmount > balance) {
+        alert("Insufficient balance.");
+        return;
+      }
+
+      const colours = ['red', 'green'];
+      const systemChoice = colours[Math.floor(Math.random() * colours.length)];
+
+      let resultText;
+      if (userChoice === systemChoice) {
+        balance += betAmount;
+        resultText = `✅ You WON! The colour was <b>${systemChoice.toUpperCase()}</b>.<br>+₹${betAmount}`;
+      } else {
+        balance -= betAmount;
+        resultText = `❌ You LOST! The colour was <b>${systemChoice.toUpperCase()}</b>.<br>-₹${betAmount}`;
+      }
+
+      document.getElementById("balance").textContent = balance;
+      document.getElementById("result").innerHTML = resultText;
+
+      betInput.value = "";
     }
   </script>
+
 </body>
 </html>
